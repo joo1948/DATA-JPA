@@ -2,14 +2,13 @@ package study.datajpa.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -83,4 +82,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @EntityGraph("Member.all")
     List<Member> findNamedEntityGraphByUsername(@Param("username") String username);
 
+    //DB에서 값을 불러온 후 just 화면에 뿌려주는 용도 == read만 하는 용도로 사용할거야
+    //근데 JPA라서 setter를 하게 된다면 변경감지 일어남 !
+    //JPA Hint를 사용 (@QueryHints, @QueryHint)
+    //많이 사용 ㄴㄴ
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(String username);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String username);
 }

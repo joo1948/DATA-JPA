@@ -294,6 +294,33 @@ class MemberRepositoryTest {
     }
 
 
+    @Test
+    public void queryHint() throws Exception {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        em.flush();
+        em.clear();
+
+
+        //when
+        Member findMember = memberRepository.findReadOnlyByUsername("member1"); //JPA가 변경감지 체크를 안함.
+        findMember.setUsername("member2");
+
+        em.flush(); //Update Query 실행X
+    }
+
+    @Test
+    public void lock() throws Exception {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        em.flush();
+        em.clear();
+
+
+        //when
+        List<Member> findMember = memberRepository.findLockByUsername("member1"); //JPA가 변경감지 체크를 안함.
+    }
+
 
 
 }
