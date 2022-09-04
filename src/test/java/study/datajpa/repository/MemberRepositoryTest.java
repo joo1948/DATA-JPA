@@ -4,6 +4,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -176,4 +180,69 @@ class MemberRepositoryTest {
         //Optional<Member> optionalMembertWo = memberRepository.findOptionalByUsername("AAA");
         //IncorrectResultSizeDataAccessException 오류 반환해줌.
     }
+
+    @Test
+    public void paging(){
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+        //jpa는 페이징 시작하는 것이 0임. >> 0페이지에서 3개를 가져오고 username을 DESC로 할거야
+
+
+        //when
+        //1.Page
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+        //> DB에서 바로 전달받은 page를 Controller에서 바로 반환 하면 안됨.
+        //>> Entity가 바뀌게 된다면 API스팩이 달라지므로, 장애 발생 위험도가 높아짐
+        //페이징 처리를 하면서 totalcount에 관한 쿼리도 날려줌
+
+        //2.Slice
+        //Slice<Member> page = memberRepository.findByAge(age, pageRequest);
+
+        //3. List >> 페이징 관련된 메서드는 사용 X 그냥 단순 limit 쿼리는 날라감
+        //List<Member> page = memberRepository.findByAge(age, pageRequest);
+
+        //then
+        Page<MemberDto> toMap = page.map(m -> new MemberDto(m.getId(), m.getUsername(), m.getTeam().getName())); //Entity를 그대로 반환하는 것이 아닌 Dto로 변경하여 반환할 것 .
+
+
+        List<Member> content = page.getContent();
+        long totalElements = page.getTotalElements();
+
+        assertThat(content.size()).isEqualTo(3);//컨텐츠 나오는 개수
+        assertThat(page.getTotalElements()).isEqualTo(5);//
+        assertThat(page.getNumber()).isEqualTo(0);//페이지 번호 가져올 수 있음 (page.getNumber())
+        assertThat(page.getTotalPages()).isEqualTo(2);//전체 페이지 개수 (page.getTotalPages())
+        assertThat(page.isFirst()).isTrue();//첫번째 페이지인지 확인
+        assertThat(page.hasNext()).isTrue();//다음 페이지가 있는지 확인
+
+
+
+        //2. 반환값 Slice에서 사용 >> 차이점 Slice는 limit값에 +1을 하여 가져옴. ==> 페이지 갯수 관련된 메서드 제공 X
+        /*
+        ///실행된 쿼리 : select member0_.member_id as member_i1_0_, member0_.age as age2_0_, member0_.team_id as team_id4_0_, member0_.username as username3_0_ from member member0_ where member0_.age=10 order by member0_.username desc limit 4;
+        List<Member> content = page.getContent();
+        //long totalElements = page.getTotalElements(); >>Slice에서 사용 X
+
+        assertThat(content.size()).isEqualTo(3);//컨텐츠 나오는 개수
+        //assertThat(page.getTotalElements()).isEqualTo(5);// >> Slice에서 사용 X
+        assertThat(page.getNumber()).isEqualTo(0);//페이지 번호 가져올 수 있음 (page.getNumber())
+        //assertThat(page.getTotalPages()).isEqualTo(2);// >> Slice에서 사용 X
+        assertThat(page.isFirst()).isTrue();//첫번째 페이지인지 확인
+        assertThat(page.hasNext()).isTrue();//다음 페이지가 있는지 확인
+
+         */
+
+
+    }
+
+
+
+
 }
