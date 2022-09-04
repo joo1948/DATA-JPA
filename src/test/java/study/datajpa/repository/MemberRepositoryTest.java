@@ -158,4 +158,22 @@ class MemberRepositoryTest {
         }
 
     }
+
+    @Test
+    public void returnTypeTest(){
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("AAA", 20 );
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member>  listMember = memberRepository.findListByUsername("AAASDFSDF"); //List는 값이 없는 경우 List에 아무것도 안들어감. if(listMember != null) 이런 식의 코드 필요 X
+        Member findMember = memberRepository.findMemberByUsername("AAASDFSDF"); //단건 조회를 할 경우 값이 없다면 Member에 null이 들어감
+        Optional<Member> optionalMember = memberRepository.findOptionalByUsername("asdfsf");//null인 경우 Optional 사용 (Optional은 null인 경우 empty로 조회됨.)
+
+        System.out.println("optionalMember = " + optionalMember);
+
+        //만약 값이 두개 이상일 경우 ?
+        //Optional<Member> optionalMembertWo = memberRepository.findOptionalByUsername("AAA");
+        //IncorrectResultSizeDataAccessException 오류 반환해줌.
+    }
 }
