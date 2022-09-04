@@ -8,6 +8,10 @@ import javax.persistence.*;
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of={"id","username","age"}) //양방향 되어있는것은 X
+@NamedQuery(
+        name="Member.findByUsername",
+        query="select m from Member m where m.username = :username") //NamedQuery는 어플리케이션 로딩 시점에 sql로 파싱을 해본다. >> 이때 오류가 있으면 잡을 수 있음.
+//NamedQuery가 아닌 쿼리를 직접 작성하는경우는 실제 동작할 때 오류가 발생한다. > 장애 나기 쉬움
 public class Member {
 
     @Id
@@ -40,6 +44,11 @@ public class Member {
         if(team!=null){//null이면 예외처리해야함. 지금은 X
             changeTeam(team);
         }
+    }
+
+    public Member(String username, int age) {
+        this.username = username;
+        this.age = age;
     }
 
     //양방향 연관관계 메서드
