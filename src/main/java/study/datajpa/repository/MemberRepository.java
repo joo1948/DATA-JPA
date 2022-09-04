@@ -2,7 +2,7 @@ package study.datajpa.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -59,5 +59,28 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     //순수 JPA에 있는 .executeUpdate()와 같은 것! 벌크연산을 Spring DataJPA로 만들라면 꼭 써줄 것
     @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
     int bulkAgePlus(@Param("age") int age);
+
+
+    //패치 조인
+    //JPQL 사용한 것
+    @Query("select m from Member m left join fetch m.team")
+    List<Member> findMemberFetchJoin();
+
+    //EntityGraph 사용
+    @Override
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findAll();
+
+    //EntityGraph + JPQL 사용
+    @EntityGraph(attributePaths = {"team"})
+    @Query("select m from Member m")
+    List<Member> findMemberEntityGraph(String member1);
+
+    //쿼리 메서드 이름으로 판단 + EntityGraph
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findEntityGraphByUsername(@Param("username") String username);
+
+    @EntityGraph("Member.all")
+    List<Member> findNamedEntityGraphByUsername(@Param("username") String username);
 
 }

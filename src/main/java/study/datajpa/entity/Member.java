@@ -11,7 +11,8 @@ import javax.persistence.*;
 @NamedQuery(
         name="Member.findByUsername",
         query="select m from Member m where m.username = :username") //NamedQuery는 어플리케이션 로딩 시점에 sql로 파싱을 해본다. >> 이때 오류가 있으면 잡을 수 있음.
-//NamedQuery가 아닌 쿼리를 직접 작성하는경우는 실제 동작할 때 오류가 발생한다. > 장애 나기 쉬움
+//NamedQuery가 아닌 쿼리를 직접 작성하는경우는 실제 동작할 때 오류가 발생한다. > 장애 나기
+@NamedEntityGraph(name="Member.all", attributeNodes = @NamedAttributeNode("team"))
 public class Member {
 
     @Id
