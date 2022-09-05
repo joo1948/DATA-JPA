@@ -1,4 +1,4 @@
-package study.datajpa.dto;
+package study.datajpa.entity.dto;
 
 public class MemberDto {
 

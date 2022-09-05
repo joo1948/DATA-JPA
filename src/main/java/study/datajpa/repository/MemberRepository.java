@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
-import study.datajpa.dto.MemberDto;
+import study.datajpa.entity.dto.MemberDto;
 import study.datajpa.entity.Member;
 
 import javax.persistence.LockModeType;
@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
     //1. 메소드 이름으로 쿼리 생성 (Spring Data JPA에서 제공) >> 이름이 계속 길어질 수 있으며, 이름이 형식과 달라지면 오류 발생
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
@@ -32,7 +32,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<String> findUsernameList();
 
     //***DTO 조회
-    @Query("select new study.datajpa.dto.MemberDto(m.id, m.username, t.name) from Member m join m.team t")
+    @Query(value = "select new study.datajpa.dto.MemberDto(m.id, m.username, t.name) from Member m join m.team t", nativeQuery = true)
     List<MemberDto> findMemberDto();
 
     @Query("select m from Member m where m.username in :names")
@@ -91,4 +91,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String username);
+
+
 }
