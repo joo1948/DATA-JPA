@@ -2,10 +2,15 @@ package study.datajpa.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import study.datajpa.entity.Member;
+import study.datajpa.entity.dto.MemberDto;
 import study.datajpa.repository.MemberRepository;
 
 import javax.annotation.PostConstruct;
@@ -29,9 +34,32 @@ public class MemberController {
         return member.getUsername();
     }
 
-    @PostConstruct
+    //페이징
+    @GetMapping("/members")
+    //localhost:8080/members?page=1&size=3&sort=username,desc
+    ///members뒤에 ?page=1&size=3&sort=username,desc넣어서 사용 가능
+    //page : 페이지 번호 , size : 한 페이지에 몇개 조회할지, sort : sort 할 것 >> 안할 경우는 default가 20개 가져옴
+    //default 값 변경하려면 application.yml변경 or 해당 메서드에만 특정 값 줄 땐 @PageableDefault 사용
+    public Page<MemberDto> list(@PageableDefault(size=5) Pageable pageable){
+        Page<Member> page = memberRepository.findAll(pageable);
+        Page<MemberDto> pageDto = page.map(MemberDto::new);
+        return pageDto;
+    }
+
+    //Page번호를 0이 아닌 1부터 시작하게 하고 싶다.>> pageable를 본인이 선언하기
+    @GetMapping("/members/pagingNumOne")
+    public Page<MemberDto> listPageNumOne(@PageableDefault(size=5) Pageable pageable){
+        PageRequest request = PageRequest.of(1, 2);
+        Page<Member> page = memberRepository.findAll(request);
+        Page<MemberDto> pageDto = page.map(MemberDto::new);
+        return pageDto;
+    }
+    
+    @PostConstruct //spring 실행 될 때 해당 메서드 실행됨.
     public void init(){
-        memberRepository.save(new Member("userA"));
+        for(int i=0;i<100;i++){
+            memberRepository.save(new Member("user"+i, i, null));
+        }
     }
 
 }

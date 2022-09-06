@@ -208,7 +208,7 @@ class MemberRepositoryTest {
         //List<Member> page = memberRepository.findByAge(age, pageRequest);
 
         //then
-        Page<MemberDto> toMap = page.map(m -> new MemberDto(m.getId(), m.getUsername(), m.getTeam().getName())); //Entity를 그대로 반환하는 것이 아닌 Dto로 변경하여 반환할 것 .
+        Page<MemberDto> toMap = page.map(m -> new MemberDto(m.getId(), m.getUsername())); //Entity를 그대로 반환하는 것이 아닌 Dto로 변경하여 반환할 것 .
 
 
         List<Member> content = page.getContent();
