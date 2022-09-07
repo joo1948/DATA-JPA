@@ -1,9 +1,11 @@
 package study.datajpa.repository;
 
 import org.assertj.core.api.Assertions;
+import org.h2.engine.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -324,6 +326,55 @@ class MemberRepositoryTest {
     @Test
     public void callCustom(){
         List<Member> memberCustom = memberRepository.findMemberCustom();
+    }
+
+
+    @Test
+    public void projections(){
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        em.persist(new Member("m1", 0, teamA));
+        em.persist(new Member("m2", 0, teamA));
+
+        em.flush();
+        em.clear();
+
+        /*ㅇ인터페이스로 Projection구현
+        //when
+        List<UsernameOnly> result = memberRepository.findProjectionsByUsername("m1"); //엔티티의 전체 데이터를 가져오는 것이 아닌 특정 값만 가져오는 것 ( Projections )
+        //인터페이스를 구현하면, 관련된 구현 클래스 내용은 Spring dataJpa가 만들어준다.
+        //따라서 내가 username만 가져오라고 한 것도 아닌데 알아서 가져와줌.
+
+        for(UsernameOnly usernameOnly : result){
+            System.out.println("usernameOnly = " + usernameOnly.getUsername());
+        }
+
+         */
+
+        /*class로 Proejction구현
+
+        List<UsernameOnlyDto> result = memberRepository.findProjectionsByUsername("m1");
+        //클래스는 실제 객체 주소 result에 들어감.
+
+        for(UsernameOnlyDto usernameOnlyDto : result){
+            System.out.println("usernameOnly = " + usernameOnlyDto.getUsername());
+        }
+         */
+
+        /*
+        * 중첩 구조
+        * join을 하는 경우 처음 가져오는 default엔티티의 값만 최적화를 해줌. 2,3번째는 안해줌.>> 2,3번째는 원하는 값만 가져오지 않고, 모든 엔티티의 값이 나옴
+        * */
+
+        List<NestedClosedProjection> result = memberRepository.findProjectionsByUsername("m1");
+        //클래스는 실제 객체 주소 result에 들어감.
+
+        for(NestedClosedProjection nestedClosedProjection : result){
+            String username = ("usernameOnly = " + nestedClosedProjection.getUsername());
+
+        }
     }
 
 }
